@@ -1,4 +1,4 @@
-package com.shm.gatewayservice;
+package com.shmportfolio.gatewayservice;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

@@ -1,4 +1,4 @@
-package com.shm.gatewayservice.service;
+package com.shmportfolio.gatewayservice.service;
 
 import org.springframework.http.HttpMethod;
 

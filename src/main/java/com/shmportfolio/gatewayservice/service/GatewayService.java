@@ -1,9 +1,8 @@
-package com.shm.gatewayservice.service;
+package com.shmportfolio.gatewayservice.service;
 
-import com.shm.gatewayservice.Exception.GatewayException;
+import com.shmportfolio.gatewayservice.exception.GatewayException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -13,7 +12,6 @@ import java.net.URI;
 import java.util.Map;
 import java.util.function.Function;
 
-@Service
 public class GatewayService implements IGatewayService{
     private final WebClient webClient;
 

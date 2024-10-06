@@ -1,4 +1,4 @@
-package com.shm.gatewayservice.Exception;
+package com.shmportfolio.gatewayservice.exception;
 
 
 import org.springframework.http.HttpStatusCode;
