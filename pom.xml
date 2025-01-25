@@ -4,7 +4,7 @@
   <groupId>com.shmportfolio.gatewayservice</groupId>
   <artifactId>api-gateway</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.7</version>
+  <version>1.1.0</version>
   <url>https://github.com/Shaheem17/api-gateway</url>
   <name>api-gateway</name>
   <description>A package to simplify API integration using WebFlux</description>

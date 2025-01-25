@@ -3,6 +3,8 @@ package com.shmportfolio.gatewayservice.service;
 import com.shmportfolio.gatewayservice.exception.GatewayException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -81,6 +83,55 @@ public class GatewayService implements IGatewayService{
                 .bodyToMono(responseType)
                 .block();
     }
+
+    @Override
+    public <R> R sendRestApiMultipart(
+            String path,
+            Map<String, Object> formData,
+            HttpMethod method,
+            Map<String, String> queryParams,
+            Map<String, String> pathVariables,
+            Map<String, String> headers,
+            Class<R> responseType) {
+
+        return sendRestApiMultipart(
+                uriBuilder -> buildUri(path, queryParams, pathVariables),
+                formData,
+                method,
+                headers,
+                responseType
+        );
+    }
+
+    public <R> R sendRestApiMultipart(
+            Function<UriBuilder, URI> uriFunction,
+            Map<String, Object> formData,
+            HttpMethod method,
+            Map<String, String> headers,
+            Class<R> responseType) {
+
+        WebClient.RequestHeadersSpec<?> headersSpec;
+
+        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+        formData.forEach(bodyBuilder::part);
+
+        headersSpec = webClient.method(method)
+                .uri(uriFunction)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(bodyBuilder.build()));
+
+        if (headers != null) {
+            headers.forEach(headersSpec::header);
+        }
+
+        return headersSpec.retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(errorBody -> Mono.error(new GatewayException(response.statusCode(), errorBody))))
+                .bodyToMono(responseType)
+                .block();
+    }
+
 
     private URI buildUri(String basePath, Map<String, String> queryParams, Map<String, String> pathVariables) {
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(basePath);

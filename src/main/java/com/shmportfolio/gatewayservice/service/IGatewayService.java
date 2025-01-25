@@ -106,4 +106,51 @@ public interface IGatewayService {
 
     <T> T getRestApi(String path, Map<String, String> queryParams, Map<String, String> pathVariables, Map<String, String> headers, Class<T> responseType);
 
+
+    /**
+     * Sends an HTTP request to a REST API using the specified method and form data.
+     * <p>
+     * This method is designed for making requests to external APIs that require
+     * a request body in the form of <b>multipart/form-data</b>. It supports HTTP methods such as
+     * POST, PUT, or others as specified. The method allows you to specify the endpoint path,
+     * form data fields, query parameters, path variables, and headers.
+     * The method returns the response deserialized into the specified response type {@code R}.
+     * </p>
+     *
+     * <p><b>Note:</b>
+     * Ensure that the form data is properly structured, with keys representing field names and values
+     * representing the data to be sent. Values can include strings, files, or other supported data types.
+     * The response type should match the expected API response format. Implementations should also
+     * handle potential exceptions or errors that may occur during the API call.</p>
+     *
+     * <p><b>Usage:</b></p>
+     * <pre>{@code
+     * Map<String, Object> formData = new HashMap<>();
+     * formData.put("key1", "value1");
+     * formData.put("file", new FileSystemResource("/path/to/file.txt"));
+     *
+     * String response = sendRestApiMultipart(
+     *     "/upload",
+     *     formData,
+     *     HttpMethod.POST,
+     *     null, // queryParams
+     *     null, // pathVariables
+     *     Map.of("Authorization", "Bearer token"),
+     *     String.class
+     * );
+     * }</pre>
+     *
+     * @param path the endpoint path of the API to be called
+     * @param formData a map containing form data fields to include in the request body.
+     *                 Keys represent field names, and values can include strings, files, or other data types.
+     * @param method the HTTP method to be used for the request (e.g., POST, PUT, PATCH)
+     * @param queryParams a map of query parameters to include in the API request
+     * @param pathVariables a map of path variables to substitute in the API endpoint path
+     * @param headers a map of headers to include in the API request
+     * @param responseType the expected response type, of type {@code R}
+     * @param <R> the type of the response
+     * @return the response from the API, deserialized into the specified response type {@code R}
+     */
+    <R> R sendRestApiMultipart(String path, Map<String, Object> formData, HttpMethod method, Map<String, String> queryParams, Map<String, String> pathVariables, Map<String, String> headers, Class<R> responseType);
+
 }
