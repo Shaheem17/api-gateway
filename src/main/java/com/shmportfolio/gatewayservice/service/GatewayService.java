@@ -1,5 +1,6 @@
 package com.shmportfolio.gatewayservice.service;
 
+import com.shmportfolio.gatewayservice.dto.ApiResponse;
 import com.shmportfolio.gatewayservice.exception.GatewayException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -11,6 +12,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -57,6 +59,60 @@ public class GatewayService implements IGatewayService{
                                 .flatMap(errorBody -> Mono.error(new GatewayException(response.statusCode(), errorBody))))
                 .bodyToMono(responseType)
                 .block();
+    }
+
+    @Override
+    public <T> ApiResponse<T> getRestApiWithHeaders(String path, Map<String, String> queryParams, Map<String, String> pathVariables, Map<String, String> headers, Class<T> responseType) {
+        return getRestApiWithHeaders(uriBuilder -> buildUri(path, queryParams, pathVariables), headers, responseType);
+    }
+
+    public <T> ApiResponse<T> getRestApiWithHeaders(Function<UriBuilder, URI> uriFunction, Map<String, String> headers, Class<T> responseType) {
+        WebClient.RequestHeadersSpec<?> headersSpec = webClient.get().uri(uriFunction);
+        if (headers != null) {
+            headers.forEach(headersSpec::header);
+        }
+        return headersSpec.exchangeToMono(response -> {
+            Map<String, List<String>> responseHeaders = response.headers().asHttpHeaders();
+            return response.bodyToMono(responseType)
+                    .map(responseBody -> new ApiResponse<>(responseBody, responseHeaders))
+                    .switchIfEmpty(Mono.just(new ApiResponse<>(null, responseHeaders)));
+        }).block();
+    }
+
+    @Override
+    public <T, R> ApiResponse<T> sendRestApiRequest(
+            String path,
+            Map<String, String> queryParams,
+            Map<String, String> pathVariables,
+            Map<String, String> headers,
+            HttpMethod method,
+            R requestBody,
+            Class<T> responseType) {
+        return sendRestApiRequest(uriBuilder -> buildUri(path, queryParams, pathVariables), headers, method, requestBody, responseType);
+    }
+
+    public <T, R> ApiResponse<T> sendRestApiRequest(
+            Function<UriBuilder, URI> uriFunction,
+            Map<String, String> headers,
+            HttpMethod method,
+            R requestBody,
+            Class<T> responseType) {
+        WebClient.RequestBodySpec requestSpec = webClient.method(method).uri(uriFunction);
+
+        if (headers != null) {
+            headers.forEach(requestSpec::header);
+        }
+
+        if (requestBody != null) {
+            requestSpec.bodyValue(requestBody);
+        }
+
+        return requestSpec.exchangeToMono(response -> {
+            Map<String, List<String>> responseHeaders = response.headers().asHttpHeaders();
+            return response.bodyToMono(responseType)
+                    .map(responseBody -> new ApiResponse<>(responseBody, responseHeaders))
+                    .switchIfEmpty(Mono.just(new ApiResponse<>(null, responseHeaders)));
+        }).block();
     }
 
 

@@ -1,5 +1,6 @@
 package com.shmportfolio.gatewayservice.service;
 
+import com.shmportfolio.gatewayservice.dto.ApiResponse;
 import org.springframework.http.HttpMethod;
 
 import java.util.Map;
@@ -152,5 +153,52 @@ public interface IGatewayService {
      * @return the response from the API, deserialized into the specified response type {@code R}
      */
     <R> R sendRestApiMultipart(String path, Map<String, Object> formData, HttpMethod method, Map<String, String> queryParams, Map<String, String> pathVariables, Map<String, String> headers, Class<R> responseType);
+
+
+    /**
+     * Sends a GET request to a REST API and retrieves the response along with headers.
+     * <p>
+     * This method is designed for making GET requests to external APIs, using the specified
+     * path, query parameters, path variables, and headers. It returns an {@code ApiResponse<T>}
+     * object that encapsulates the response body and headers.
+     * </p>
+     *
+     * <p><b>Note:</b> Ensure that the response type is correctly specified to match the
+     * expected API response format. The method also provides access to response headers,
+     * making it suitable for scenarios where additional metadata from the response is required.
+     * Implementations should handle potential exceptions or errors that may occur during the API call.
+     * </p>
+     *
+     * @param path the endpoint path of the API to be called
+     * @param queryParams a map of query parameters to include in the API request
+     * @param pathVariables a map of path variables to substitute in the API endpoint path
+     * @param headers a map of headers to include in the API request
+     * @param responseType the expected response type, of type {@code T}
+     * @param <T> the type of the response body
+     * @return an {@code ApiResponse<T>} object containing the response body and headers
+     */
+    <T> ApiResponse<T> getRestApiWithHeaders(String path, Map<String, String> queryParams, Map<String, String> pathVariables, Map<String, String> headers, Class<T> responseType);
+
+    /**
+     * Sends an HTTP request to a REST API and retrieves the response along with headers.
+     * <p>
+     * This method is designed for making HTTP requests (GET, POST, PUT, DELETE, etc.) to external APIs,
+     * using the specified path, query parameters, path variables, headers, HTTP method, and request body.
+     * It returns an {@code ApiResponse<T>} object that encapsulates the response body and headers.
+     * </p>
+     *
+     * @param path         the endpoint path of the API to be called
+     * @param queryParams  a map of query parameters to include in the API request
+     * @param pathVariables a map of path variables to substitute in the API endpoint path
+     * @param headers      a map of headers to include in the API request
+     * @param method       the HTTP method (GET, POST, PUT, DELETE, etc.)
+     * @param requestBody  the request body to send with the API call (if applicable)
+     * @param responseType the expected response type, of type {@code T}
+     * @param <T>          the type of the response body
+     * @param <R>          the type of the request body
+     * @return an {@code ApiResponse<T>} object containing the response body and headers
+     */
+    <T, R> ApiResponse<T> sendRestApiRequest(String path, Map<String, String> queryParams, Map<String, String> pathVariables, Map<String, String> headers, HttpMethod method, R requestBody, Class<T> responseType);
+
 
 }
